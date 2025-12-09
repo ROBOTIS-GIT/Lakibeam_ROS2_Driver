@@ -10,11 +10,6 @@
   <depend>rclcpp</depend>
   <depend>rclpy</depend>
   <depend>sensor_msgs</depend>
-  <depend>visualization_msgs</depend>
-  <depend>diagnostic_updater</depend>
-  <depend>dynamic_reconfigure</depend>
-  <depend>message_generation</depend>
-  <exec_depend>message_runtime</exec_depend>
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
   <export>
