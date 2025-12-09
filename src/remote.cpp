@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <rclcpp/rclcpp.hpp> 
+#include <rclcpp/rclcpp.hpp>
 #include <curl/curl.h>
 #include "../thirdparty/rapidjson/document.h"
 #include "../thirdparty/rapidjson/prettywriter.h"
@@ -21,7 +21,7 @@ static size_t dummy_callback(void *buffer, size_t size, size_t nmemb, void *user
 int sensor_config(std::string sensor_ipaddr, std::string parameter, std::string value)
 {
 	RCLCPP_INFO(node_handle->get_logger(),"URL_RESTFUL_API");
-	
+
 	long http_code;
 	CURL *curl = curl_easy_init();
 	std::string URL_RESTFUL_API = "http://" + sensor_ipaddr + parameter;
