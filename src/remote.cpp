@@ -18,18 +18,14 @@ static size_t dummy_callback(void *buffer, size_t size, size_t nmemb, void *user
    return size * nmemb;
 }
 
-int sensor_config(rclcpp::Node::SharedPtr node_handle, std::string sensor_ipaddr, std::string parameter, std::string value)
+int sensor_config(const rclcpp::Logger& logger, std::string sensor_ipaddr, std::string parameter, std::string value)
 {
-	if (node_handle == nullptr) {
-		std::cerr << "Error: node_handle is nullptr." << std::endl;
-		return -1;
-	}
-	RCLCPP_INFO(node_handle->get_logger(),"URL_RESTFUL_API");
+	RCLCPP_INFO(logger,"URL_RESTFUL_API");
 
 	long http_code;
 	CURL *curl = curl_easy_init();
 	std::string URL_RESTFUL_API = "http://" + sensor_ipaddr + parameter;
-	RCLCPP_INFO(node_handle->get_logger(),"URL_RESTFUL_API%s",URL_RESTFUL_API.c_str());
+	RCLCPP_INFO(logger,"URL_RESTFUL_API%s",URL_RESTFUL_API.c_str());
 	curl_easy_setopt(curl, CURLOPT_TIMEOUT, 3);
 	if(curl) {
 		curl_easy_setopt(curl, CURLOPT_URL, URL_RESTFUL_API.c_str());
@@ -40,16 +36,16 @@ int sensor_config(rclcpp::Node::SharedPtr node_handle, std::string sensor_ipaddr
 			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
 			if(http_code == 200)
 			{
-				RCLCPP_INFO(node_handle->get_logger(),"Set %s, Value: %s ... done", URL_RESTFUL_API.c_str(), value.c_str());
+				RCLCPP_INFO(logger,"Set %s, Value: %s ... done", URL_RESTFUL_API.c_str(), value.c_str());
 			}
 			else
 			{
-				RCLCPP_INFO(node_handle->get_logger(),"Set %s, Value: %s ... failed!", URL_RESTFUL_API.c_str(), value.c_str());
+				RCLCPP_INFO(logger,"Set %s, Value: %s ... failed!", URL_RESTFUL_API.c_str(), value.c_str());
 			}
 		}
 		else
 		{
-			RCLCPP_INFO(node_handle->get_logger(),"http put error! please check lidar connection!");
+			RCLCPP_INFO(logger,"http put error! please check lidar connection!");
 		}
 	}
 	curl_easy_cleanup(curl);
@@ -58,12 +54,8 @@ int sensor_config(rclcpp::Node::SharedPtr node_handle, std::string sensor_ipaddr
 	return 0;
 }
 
-int get_telemetry_data(rclcpp::Node::SharedPtr node_handle, std::string sensor_ipaddr)
+int get_telemetry_data(const rclcpp::Logger& logger, std::string sensor_ipaddr)
 {
-	if (node_handle == nullptr) {
-		std::cerr << "Error: node_handle is nullptr." << std::endl;
-		return -1;
-	}
 	CURL *curl;
 	std::string readBuffer;
 	std::string URL_API_FIRMWARE = "http://" + sensor_ipaddr + "/api/v1/system/firmware";
@@ -83,13 +75,13 @@ int get_telemetry_data(rclcpp::Node::SharedPtr node_handle, std::string sensor_i
 		Document jsondoc;
 		jsondoc.Parse(json);
 		assert(jsondoc.IsObject());
-		RCLCPP_INFO(node_handle->get_logger(),"-------------------------------------------------");
-		RCLCPP_INFO(node_handle->get_logger(),"model:		%s", jsondoc["model"].GetString());
-		RCLCPP_INFO(node_handle->get_logger(),"sn:		%s", jsondoc["sn"].GetString());
-		RCLCPP_INFO(node_handle->get_logger(),"ver hw:		%s", jsondoc["hw"].GetString());
-		RCLCPP_INFO(node_handle->get_logger(),"ver fpga:	%s", jsondoc["fpga"].GetString());
-		RCLCPP_INFO(node_handle->get_logger(),"ver core:	%s", jsondoc["core"].GetString());
-		RCLCPP_INFO(node_handle->get_logger(),"ver aux:	%s", jsondoc["aux"].GetString());
+		RCLCPP_INFO(logger,"-------------------------------------------------");
+		RCLCPP_INFO(logger,"model:		%s", jsondoc["model"].GetString());
+		RCLCPP_INFO(logger,"sn:		%s", jsondoc["sn"].GetString());
+		RCLCPP_INFO(logger,"ver hw:		%s", jsondoc["hw"].GetString());
+		RCLCPP_INFO(logger,"ver fpga:	%s", jsondoc["fpga"].GetString());
+		RCLCPP_INFO(logger,"ver core:	%s", jsondoc["core"].GetString());
+		RCLCPP_INFO(logger,"ver aux:	%s", jsondoc["aux"].GetString());
 	}
 
 	curl = curl_easy_init();
@@ -105,9 +97,9 @@ int get_telemetry_data(rclcpp::Node::SharedPtr node_handle, std::string sensor_i
 		Document jsondoc;
 		jsondoc.Parse(json);
 		assert(jsondoc.IsObject());
-		RCLCPP_INFO(node_handle->get_logger(),"load average:	%.2f", jsondoc["load_average"].GetDouble());
-		RCLCPP_INFO(node_handle->get_logger(),"men useage:	%.2f", jsondoc["mem_useage"].GetDouble());
-		RCLCPP_INFO(node_handle->get_logger(),"uptime:		%.2f sec", jsondoc["uptime"].GetDouble());
+		RCLCPP_INFO(logger,"load average:	%.2f", jsondoc["load_average"].GetDouble());
+		RCLCPP_INFO(logger,"men useage:	%.2f", jsondoc["mem_useage"].GetDouble());
+		RCLCPP_INFO(logger,"uptime:		%.2f sec", jsondoc["uptime"].GetDouble());
 	}
 
 	curl = curl_easy_init();
@@ -123,19 +115,19 @@ int get_telemetry_data(rclcpp::Node::SharedPtr node_handle, std::string sensor_i
 		Document jsondoc;
 		jsondoc.Parse(json);
 		assert(jsondoc.IsObject());
-		RCLCPP_INFO(node_handle->get_logger(),"scanfreq:	%d hz", jsondoc["scanfreq"].GetInt());
-		RCLCPP_INFO(node_handle->get_logger(),"motor rpm:	%d (%.2fhz)", jsondoc["motor_rpm"].GetInt(), (jsondoc["motor_rpm"].GetInt() / 60.f));
-		RCLCPP_INFO(node_handle->get_logger(),"laser enable:	%d", jsondoc["laser_enable"].GetBool());
-		RCLCPP_INFO(node_handle->get_logger(),"scan start:	%d deg", jsondoc["scan_range"]["start"].GetInt());
-		RCLCPP_INFO(node_handle->get_logger(),"scan stop:	%d deg", jsondoc["scan_range"]["stop"].GetInt());
-		RCLCPP_INFO(node_handle->get_logger(),"flt level:	%d", jsondoc["filter"]["level"].GetInt());
-		RCLCPP_INFO(node_handle->get_logger(),"flt min_angle:	%d", jsondoc["filter"]["min_angle"].GetInt());
-		RCLCPP_INFO(node_handle->get_logger(),"flt max_angle:	%d", jsondoc["filter"]["max_angle"].GetInt());
-		RCLCPP_INFO(node_handle->get_logger(),"flt window:	%d", jsondoc["filter"]["window"].GetInt());
-		RCLCPP_INFO(node_handle->get_logger(),"flt neighbors:	%d", jsondoc["filter"]["neighbors"].GetInt());
-		RCLCPP_INFO(node_handle->get_logger(),"host ip:	%s", jsondoc["host"]["ip"].GetString());
-		RCLCPP_INFO(node_handle->get_logger(),"host port:	%d", jsondoc["host"]["port"].GetInt());
-		RCLCPP_INFO(node_handle->get_logger(),"-------------------------------------------------");
+		RCLCPP_INFO(logger,"scanfreq:	%d hz", jsondoc["scanfreq"].GetInt());
+		RCLCPP_INFO(logger,"motor rpm:	%d (%.2fhz)", jsondoc["motor_rpm"].GetInt(), (jsondoc["motor_rpm"].GetInt() / 60.f));
+		RCLCPP_INFO(logger,"laser enable:	%d", jsondoc["laser_enable"].GetBool());
+		RCLCPP_INFO(logger,"scan start:	%d deg", jsondoc["scan_range"]["start"].GetInt());
+		RCLCPP_INFO(logger,"scan stop:	%d deg", jsondoc["scan_range"]["stop"].GetInt());
+		RCLCPP_INFO(logger,"flt level:	%d", jsondoc["filter"]["level"].GetInt());
+		RCLCPP_INFO(logger,"flt min_angle:	%d", jsondoc["filter"]["min_angle"].GetInt());
+		RCLCPP_INFO(logger,"flt max_angle:	%d", jsondoc["filter"]["max_angle"].GetInt());
+		RCLCPP_INFO(logger,"flt window:	%d", jsondoc["filter"]["window"].GetInt());
+		RCLCPP_INFO(logger,"flt neighbors:	%d", jsondoc["filter"]["neighbors"].GetInt());
+		RCLCPP_INFO(logger,"host ip:	%s", jsondoc["host"]["ip"].GetString());
+		RCLCPP_INFO(logger,"host port:	%d", jsondoc["host"]["port"].GetInt());
+		RCLCPP_INFO(logger,"-------------------------------------------------");
 	}
 
 	return 0;
