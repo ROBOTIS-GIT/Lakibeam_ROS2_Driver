@@ -31,7 +31,7 @@ public:
 		get_parameters();
 		scan_pub = create_publisher<sensor_msgs::msg::LaserScan>(output_topic, 1000);
 		info();
-		// scan_config();
+		scan_config();
 		create_socket();
 		scan_publish();
 	}
