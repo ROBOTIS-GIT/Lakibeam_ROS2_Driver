@@ -6,8 +6,10 @@
 #include <cstdio>
 #include <cstring>
 #include <iostream>
-int sensor_config(std::string sensor_ipaddr, std::string parameter, std::string value);
-int get_telemetry_data(std::string sensor_ipaddr);
+#include <rclcpp/rclcpp.hpp>
+
+int sensor_config(rclcpp::Node::SharedPtr node_handle, std::string sensor_ipaddr, std::string parameter, std::string value);
+int get_telemetry_data(rclcpp::Node::SharedPtr node_handle, std::string sensor_ipaddr);
 
 
 #endif

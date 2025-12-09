@@ -6,7 +6,7 @@
 #include "../include/remote.h"
 
 using namespace rapidjson;
-rclcpp::Node::SharedPtr node_handle = nullptr;
+
 static size_t WriteCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
     ((std::string*)userp)->append((char*)contents, size * nmemb);
@@ -18,8 +18,12 @@ static size_t dummy_callback(void *buffer, size_t size, size_t nmemb, void *user
    return size * nmemb;
 }
 
-int sensor_config(std::string sensor_ipaddr, std::string parameter, std::string value)
+int sensor_config(rclcpp::Node::SharedPtr node_handle, std::string sensor_ipaddr, std::string parameter, std::string value)
 {
+	if (node_handle == nullptr) {
+		std::cerr << "Error: node_handle is nullptr." << std::endl;
+		return -1;
+	}
 	RCLCPP_INFO(node_handle->get_logger(),"URL_RESTFUL_API");
 
 	long http_code;
@@ -54,8 +58,12 @@ int sensor_config(std::string sensor_ipaddr, std::string parameter, std::string 
 	return 0;
 }
 
-int get_telemetry_data(std::string sensor_ipaddr)
+int get_telemetry_data(rclcpp::Node::SharedPtr node_handle, std::string sensor_ipaddr)
 {
+	if (node_handle == nullptr) {
+		std::cerr << "Error: node_handle is nullptr." << std::endl;
+		return -1;
+	}
 	CURL *curl;
 	std::string readBuffer;
 	std::string URL_API_FIRMWARE = "http://" + sensor_ipaddr + "/api/v1/system/firmware";

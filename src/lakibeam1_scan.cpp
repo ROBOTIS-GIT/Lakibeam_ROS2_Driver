@@ -85,11 +85,19 @@ protected:
 	void scan_config()
 	{
 		RCLCPP_INFO(get_logger(),"scan_config");
-		// sensor_config(sensorip, "/api/v1/sensor/scanfreq", scanfreq);
-		// sensor_config(sensorip, "/api/v1/sensor/laser_enable", laser_enable);
-		// sensor_config(sensorip, "/api/v1/sensor/scan_range/start", scan_range_start);
-		// sensor_config(sensorip, "/api/v1/sensor/scan_range/stop", scan_range_stop);
-		sensor_config(sensorip, "/api/v1/sensor/host/port", port);
+		// Get shared_ptr to this node - this should work if node is created with make_shared
+		rclcpp::Node::SharedPtr node_ptr;
+		try {
+			node_ptr = shared_from_this();
+		} catch (const std::exception& e) {
+			RCLCPP_ERROR(get_logger(), "Failed to get shared_ptr: %s", e.what());
+			return;
+		}
+		sensor_config(node_ptr, sensorip, "/api/v1/sensor/scanfreq", scanfreq);
+		sensor_config(node_ptr, sensorip, "/api/v1/sensor/laser_enable", laser_enable);
+		sensor_config(node_ptr, sensorip, "/api/v1/sensor/scan_range/start", scan_range_start);
+		sensor_config(node_ptr, sensorip, "/api/v1/sensor/scan_range/stop", scan_range_stop);
+		sensor_config(node_ptr, sensorip, "/api/v1/sensor/host/port", port);
 		RCLCPP_INFO(get_logger(),"scan_config1");
 
 	};
